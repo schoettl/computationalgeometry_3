@@ -1,0 +1,13 @@
+name:                intersect
+version:             0.1.0.0
+synopsis:            intersect - calculate number of intersecting lines
+-- description:         
+author:              Jakob Schöttl
+maintainer:          jschoett@gmail.com
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable intersect
+  main-is:             Main.hs 
+  build-depends:       base
+  default-language:    Haskell2010
