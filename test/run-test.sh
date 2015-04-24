@@ -1,4 +1,10 @@
 #!/bin/bash
+usage="usage: $0 <intersect-program>"
+
+if [[ $# != 1 ]]; then
+    echo "$usage" >&2
+    exit 1
+fi
 
 intersect=$1
 

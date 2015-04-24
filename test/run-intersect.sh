@@ -30,8 +30,8 @@ if [[ $cmd == false ]]; then
 fi
 
 if [[ $inputfile == all ]]; then
-    echo processing all
     for inputfile in data/*.dat; do
+        echo processing $inputfile
         time $cmd < "$inputfile"
     done
 else

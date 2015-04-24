@@ -23,9 +23,13 @@ accumulateToPairs x (l, Just y) = ((x, y):l, Nothing)
 
 countIntersects :: (Num a, Ord a) => [((a, a), (a, a))] -> Int
 countIntersects lines =
-  let pairs = [ (a, b) | a <- lines, b <- lines, a /= b ] in
-    let lessPairs = nubBy (\(a, b) (c, d) -> a == c && b == d || a == d && b == c) pairs in
-      length $ filter (==True) $ map intersect lessPairs
+  let pairs = makePairs lines in
+    length $ filter (==True) $ map intersect pairs
+
+-- Make pairs like in C++
+makePairs :: [a] -> [(a, a)]
+makePairs [] = []
+makePairs (x:xs) = [ (x, y) | y <- xs ] ++ makePairs xs
 
 intersect :: (Num a, Ord a) => (((a, a), (a, a)), ((a, a), (a, a))) -> Bool
 intersect (this, other)
