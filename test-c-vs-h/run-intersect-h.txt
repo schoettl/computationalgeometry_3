@@ -1,0 +1,25 @@
+/home/jakob/cg/prakt1
+processing data/s_100000_1.dat
+77126
+
+real	45m46.651s
+user	45m30.016s
+sys	0m7.423s
+processing data/s_10000_1.dat
+732
+
+real	0m17.320s
+user	0m17.185s
+sys	0m0.076s
+processing data/s_1000_1.dat
+11
+
+real	0m0.185s
+user	0m0.171s
+sys	0m0.012s
+processing data/test.dat
+8
+
+real	0m0.008s
+user	0m0.008s
+sys	0m0.001s
