@@ -16,10 +16,10 @@ convertInput input = let numbers = map (read :: String -> Double) $ words input 
 
 pairNeighbors :: [a] -> [(a, a)]
 pairNeighbors list = fst $ foldr accumulateToPairs ([], Nothing) list
-
-accumulateToPairs :: a -> ([(a, a)], Maybe a) -> ([(a, a)], Maybe a)
-accumulateToPairs x (l, Nothing) = (l, Just x)
-accumulateToPairs x (l, Just y) = ((x, y):l, Nothing)
+    where
+        accumulateToPairs :: a -> ([(a, a)], Maybe a) -> ([(a, a)], Maybe a)
+        accumulateToPairs x (l, Nothing) = (l, Just x)
+        accumulateToPairs x (l, Just y) = ((x, y):l, Nothing)
 
 countIntersects :: (Num a, Ord a) => [((a, a), (a, a))] -> Int
 countIntersects lines =
