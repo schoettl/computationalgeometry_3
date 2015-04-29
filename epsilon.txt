@@ -1,0 +1,7 @@
+grep -E '[[:digit:].]{8,}' data/*.dat | wc -l
+-> 0
+
+{8,} bedeutet, dass Zeilen mit Zahlen existieren, die mindestens 7 Ziffern haben. Hier gibt es keine Treffer.
+(bei {7,} gibt's schon noch Treffer)
+
+double hat irgendwas zwischen 12 und 15 gültige Stellen. Es kann also davon ausgegangen werden, dass trotz Fehlerfortpflanzung richtig gerechnet wird. Fehler von der letzten double-Stelle pflanzen sich nicht bis zur 7. Stelle fort (ohne Beweis).
