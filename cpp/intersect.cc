@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <unistd.h>
 
 using namespace std;
 
@@ -65,6 +66,19 @@ struct Line {
 };
 	
 int main(int argc, char *argv[]) {
+	unsigned int outerLoopLimit;
+	int c;
+	while ((c = getopt(argc, argv, "hl:")) != -1) {
+		switch (c) {
+			case 'l':
+				outerLoopLimit = atoi(optarg);
+				break;
+			case 'h':
+				cout << "usage: intersect [ -h | -l <limit_for_outer_loop> ]" << endl;
+			        return 0;
+		}
+	}
+
 	vector<Line> lines;
 	double x1, y1, x2, y2;
 	while (cin >> x1 >> y1 >> x2 >> y2) {
@@ -72,9 +86,14 @@ int main(int argc, char *argv[]) {
 		lines.push_back(Line(x1, y1, x2, y2));
 	}
 
-	int intersectCount = 0;
-	for (vector<Line>::iterator it = lines.begin(); it != lines.end(); it++) {
-		//cout << (*it)->sx << endl;
+	if (outerLoopLimit == 0) {
+		outerLoopLimit = lines.max_size();
+	}
+	unsigned int intersectCount = 0;
+	unsigned int outerLoopCounter = 0;
+	for (vector<Line>::iterator it = lines.begin();
+			outerLoopCounter < outerLoopLimit
+			&& it != lines.end(); it++) {
 		vector<Line>::iterator jt = it;
 		jt++;
 		for (; jt != lines.end(); jt++)
@@ -82,6 +101,7 @@ int main(int argc, char *argv[]) {
 			if (it->intersect(*jt))
 				intersectCount++;
 		}
+		outerLoopCounter++;
 	}
 	cout << intersectCount << endl;
 	return 0;
