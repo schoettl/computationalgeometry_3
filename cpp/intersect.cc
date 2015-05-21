@@ -12,13 +12,9 @@ using namespace std;
 //  same in Point constructor
 //  same in Line constructor
 //  ...
-// g++ mit bester Optimierungsstufe aufrufen
-// run this: <s_100_1.dat time parallel --pipe --block <default=1M> intersect | awk '{s+=$0} END {print s}'
-// $(($(stat -c%s s_100_1.dat)/2))
-// mist, nein, das geht nicht, weil wenn input file aufgeteilt wird, haben wir ja nicht mehr alle kombinationen!
-// run this: <s_100_1.dat time parallel --pipe intersect | awk '{s+=$0} END {print s}'
+// Noch effektiver wahrscheinlich: Optimierungsstufe bei Compiler hochstellen.
 
-const double epsilon = numeric_limits<double>::epsilon();
+const double epsilon = 1e-6;
 
 bool inRange(double x, double a, double b) {
 	return x >= min(a, b) && x <= max(a, b);
@@ -42,13 +38,6 @@ struct Line {
 	Point s; // start point
 	Point e; // end point
 	Line(double sx, double sy, double ex, double ey) : s(sx, sy), e(ex, ey) { }
-	void debugLog(const Line& otherLine, const string& text) const {
-		 cerr << s.x << " " << s.y << " "
-		      << e.x << " " << e.y << " "
-		      << otherLine.s.x << " " << otherLine.s.y << " "
-		      << otherLine.e.x << " " << otherLine.e.y << " "
-		      << text << endl;
-	}
 	double ccw(const Point& p) const {
 		return (s.x*e.y - s.y*e.x) + (e.x*p.y - e.y*p.x) + (s.y*p.x - s.x*p.y);
 	}
@@ -58,7 +47,6 @@ struct Line {
 
 		// Both ends of other line at one side?
 		if (ccwStart * ccwEnd > 0) {
-			debugLog(otherLine, "both ends of other line on one side: false");
 			return false;
 		}
 
@@ -69,10 +57,8 @@ struct Line {
 			// or exactly one end of other line is on this line?
 			// ("exactly one", because otherwise we would not be here)
 			if (isLessThanOrEqualToZero(otherLine.ccw(s) * otherLine.ccw(e))) {
-				debugLog(otherLine, "clearly intersect: true" );
 				return true;
 			} else {
-				debugLog(otherLine, "not parallel, no intersect: false");
 				return false;
 			}
 		}
@@ -80,18 +66,15 @@ struct Line {
 		if (isEqualToZero(ccwStart)
 			&& inRange(otherLine.s.x, s.x, e.x)
 			&& inRange(otherLine.s.y, s.y, e.y)) {
-			debugLog(otherLine, "startpoint of other on this line: true");
 			return true;
 		}
 
 		if (isEqualToZero(ccwEnd)
 			&& inRange(otherLine.e.x, s.x, e.x)
 			&& inRange(otherLine.e.y, s.y, e.y)) {
-			debugLog(otherLine, "endpoint of other on this line: true");
 			return true;
 		}
 
-		debugLog(otherLine, "otherwise: false");
 		return false;
 	}
 };

@@ -4,14 +4,14 @@
 Jakob Schöttl, Markus Stampfl
 
 
-Implmentierung
---------------
+Implementierung
+---------------
 
 Im ersten Schritt haben wir die Aufgabe in C++ gelöst.  Das Programm findet
 sich im Ordner `cpp/` und kann über das darin enthaltenen Makefile erstellt
 werden.
 
-Für den Algorithmus haben wir auf Papier alle möglichen Fälle aufgezeichnet,
+Für den Algorithmus haben wir auf Papier alle möglichen Fälle aufgezeichnet
 und konnten durch jedes weitere if-Statement in der Funktion `intersect` eine
 weitere Gruppe abhaken, bis alle Fälle behandelt waren.
 
@@ -22,11 +22,10 @@ Hinterkopf behalten muss.  Außerdem spart man sich Variablen und Einrückungen,
 was auch zu sauberem Code beiträgt.
 
 Das C++-Programm haben wir dann in die funktionale Programmiersprache Haskell
-übersetzt.  Diese Sprache lerne ich gerade in einer anderen Vorlesung.  Der
-Algorithmus selbst ist in Haskell noch prägnanter; das Drumherum war eine
-größere Herausforderung.  Die Haskell-Implementierung liegt in `haskell/Main.hs`.
-Als Build-System verwenden wir Cabal.  Mit `cabal build` in `haskell` sollte
-das Programm erzeugt werden.
+übersetzt.  Der Algorithmus selbst ist in Haskell noch prägnanter; das
+Drumherum war eine größere Herausforderung.  Die Haskell-Implementierung
+liegt in `haskell/Main.hs`.  Als Build-System verwenden wir Cabal.  Mit
+`cabal build` in `haskell` sollte das Programm erzeugt werden.
 
 
 Aufruf der Programme
@@ -71,13 +70,14 @@ wegoptimieren.  Die Daten hierzu liegen in `test-c-vs-h/` und können mittels
 dem Makefile reproduziert werden.
 
 Die Laufzeit von Haskell hat uns anfangs Schwierigkeiten bereitet, da sie
-nicht quadratische Laufzeit sondern O(n^4) hatte.  Und das, obwohl ich nur
+nicht quadratische Laufzeit sondern O(n^4) hatte.  Und das, obwohl wir nur
 *nacheinander* (nicht verschachtelt) zwei Funktionen quadratischer Laufzeit
-verwendet habe.  Grund war, dass die erste Funktion eine Liste mit n^2 Elementen
+verwendet haben.  Grund war, dass die erste Funktion eine Liste mit n^2 Elementen
 erzeugt hat, und auf diese neue, viel längere Liste wurde die zweite Funktion
 losgelassen.  Damit ist die Laufzeit dann natürlich O((n^2)^2) = O(n^4).
 Jetzt ist es natürlich schlauer implementiert.
 Vgl. [Hilferuf per E-Mail](test-haskell-with-nubBy/Haskell_Programmlaufzeit.eml)
+-- dort sind auch Plots mit der Programmlaufzeit über n zu finden.
 Die Ergebnisse liegen in `test-haskell-with-nubBy/` und `test-haskell/`.
 
 
@@ -148,7 +148,48 @@ sys     0m0.004s
 Maschinenengenauigkeit und Epsilon
 ----------------------------------
 
+Dieser Abschnitt gilt nur für das C++-Programm.
 
+Hier hatten wir so unsere Probleme:  Welches Zahl verwenden wir als Epsilon?
+Es gibt ja für die Gleitkommadatentypen eine Maschinengenauigkeit, in C++
+zum Beispiel `numeric_limits<double>::epsilon()`.  Um diese jedoch sinnvoll
+verwenden zu können, müsste man jedoch die Fehlerfortpflanzung betrachten.
+Bei Multiplikation hängt der Fehler des Ergebnisses auch stark vom absoluten
+Zahlenwert ab.  Dieser Ansatz wurde hier nicht weiter verfolgt.
+
+Wir haben per Bash-Skript verschiedene feste Epsilon getestet (im Ordner
+`test-epsilon/`).  Hier eine Liste der Epsilon zusammen mit der jeweiligen
+Anzahl der Schnittpunkte in Testdatei `data/s_1000_1.dat`.
+
+```
+1e-1 34
+1e-2 17
+1e-3 13
+1e-4 11
+1e-5 11
+1e-6 11
+1e-7 11
+1e-8 11
+1e-9 11
+1e-10 11
+```
+
+Bei kleinen Epsilon sieht man keinen Unterschied im Ergebnis, bei sehr großen
+Epsilon ab 0.001 werden erwartungsgemäß mehr Schnittpunkte gefunden.
+
+Das Epsilon spielt bei folgenden Vergleichsoperationen eine Rolle:
+`==`, `>=`, `<=`.
+
+Hier haben wir die Funktionen `isEqualToZero` und `isLessThanOrEqualToZero`
+definiert.
+
+Werden, die eingelesen Daten direkt verwendet (`inRange`), verwenden wir normale
+Vergleiche (ohne Epsilon), da siebenstellige Daten ohne Fehler in
+double-Variablen eingelesen werden.  In allen Eingabedateien haben alle Zahlen
+maximal sieben Stellen:
+
+    $ grep -E '[[:digit:].]{8,}' data/*.dat | wc -l
+    0
 
 
 Parallelisierbarkeit
