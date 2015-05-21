@@ -84,7 +84,8 @@ Die Ergebnisse liegen in `test-haskell-with-nubBy/` und `test-haskell/`.
 Ergebnisse
 ----------
 
-Beide unsere Implementierungen kommen auf die gleichen Ergebnisse:
+Beide unsere Implementierungen kommen auf die gleichen Ergebnisse.  Die Zahlen
+unter den Zeilen `processing data/...` geben die Anzahlen der Schnittpunkte an.
 
 C++-Programm:
 
