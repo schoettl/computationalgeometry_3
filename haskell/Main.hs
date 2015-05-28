@@ -24,7 +24,7 @@ pairNeighbors list = fst $ foldr accumulateToPairs ([], Nothing) list
         accumulateToPairs x (l, Just y) = ((x, y):l, Nothing)
 
 countIntersects :: [Line] -> Int
-countIntersects ls = 0
+countIntersects ls = length $ processEventQueue (makeInitialXStructure ls) [] []
 
 type EventQueue = Map.Map Double Event
 type Intersections = [Event] -- reduzierbar auf Intersection Line Line? oder besser eigener Datentyp, der auch Schnittpunkt enthält?
