@@ -2,6 +2,7 @@ module Main where
 
 import qualified Data.Map.Lazy as Map
 import Data.List
+import Data.Maybe (fromJust)
 import CG.Basic
 import CG.Intersect (intersect)
 
@@ -30,7 +31,7 @@ type EventQueue = Map.Map Double Event
 type Intersections = [Event] -- reduzierbar auf Intersection Line Line? oder besser eigener Datentyp, der auch Schnittpunkt enthält?
 type LineYOrder = [Line]
 
-data Event = Startpoint Line | Endpoint Line | Intersection Line Line
+data Event = Startpoint Line | Endpoint Line | Intersection Line Line Point
 
 initialEventQueue :: [Line] -> EventQueue
 initialEventQueue ls = Map.fromList $ foldr f [] $ map sortLinePointsByX ls
@@ -41,31 +42,37 @@ sortLinePointsByX (p, q) = if xCoord p < xCoord q
                              then (p, q)
                              else (q, p)
 
-popEvent = Map.minView
+popEvent es = fromJust $ Map.minView es
 
 processEventQueue :: EventQueue -> LineYOrder -> Intersections -> Intersections
 processEventQueue es yo is
     | Map.null es = is
-    | otherwise = let Just (e, es') = popEvent es
-                      (es'', yo', is') = handleEvent e es' yo
+    | otherwise = let (e, es') = popEvent es
+                      (es'', yo', ii) = handleEvent es' yo e
+                      is' = if ii then e:is else is
                   in  processEventQueue es'' yo' is'
 
+
 -- unfinished:
-handleEvent :: Event -> EventQueue -> LineYOrder -> (EventQueue, LineYOrder, Intersections)
-handleEvent (Startpoint l)     es yo = (es, insertStartpointInY yo l, [])
-handleEvent (Endpoint l)       es yo = (es, removeEndpointFromY yo l, [])
-handleEvent (Intersection a b) es yo = (es, swapIntersectionsInY yo a b, [])
+handleEvent :: EventQueue -> LineYOrder -> Event -> (EventQueue, LineYOrder, Bool)
+handleEvent es yo (Startpoint l)       = (es, insertLineInY yo l, False)
+handleEvent es yo (Endpoint l)         = (es, removeLineFromY yo l, False)
+handleEvent es yo (Intersection a b _) = (es, swapLinesInY yo a b, True)
 
-insertStartpointInY :: LineYOrder -> Line -> LineYOrder
-insertStartpointInY yo l = insertBy yOrder l yo
+insertLineInY :: LineYOrder -> Line -> LineYOrder
+insertLineInY yo l = insertBy yOrder l yo
                              where yOrder a b = compare y1 y2
-                                    where y1 = yCoord $ fst a
-                                          y2 = yCoord $ fst b
+                                    where p = fst a
+                                          y1 = yCoord p
+                                          q1 = fst b
+                                          q2 = snd b
+                                          m  = (yCoord q2 - yCoord q1) / (xCoord q2 - xCoord q1)
+                                          y2 = m * (xCoord p - xCoord q1) + yCoord q1
                                     
-removeEndpointFromY :: LineYOrder -> Line -> LineYOrder
-removeEndpointFromY yo l = delete l yo
+removeLineFromY :: LineYOrder -> Line -> LineYOrder
+removeLineFromY yo l = delete l yo
 
-swapIntersectionsInY :: LineYOrder -> Line -> Line -> LineYOrder
-swapIntersectionsInY yo a b = map (\x -> if x == a then b else
-                                         if x == b then a else
-                                                        x) yo
+swapLinesInY :: LineYOrder -> Line -> Line -> LineYOrder
+swapLinesInY yo a b = map (\x -> if x == a then b else
+                                 if x == b then a else
+                                                x) yo
