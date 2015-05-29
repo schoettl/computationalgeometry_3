@@ -2,6 +2,29 @@ module CG.Intersect where
 
 import CG.Basic
 
+intersectPoint :: Line -> Line -> Maybe Point
+intersectPoint a b = case intersectX a b of
+                      Nothing -> Nothing
+                      Just x -> if isInLine a && isInLine b
+                                then Just Point { xCoord = x
+                                                , yCoord = calcY a x}
+                                else Nothing
+                                where isInLine = isXInLine x
+
+intersectX :: Line -> Line -> Maybe Double
+intersectX a b = let md = slope a - slope b
+                     td = intercept b - intercept a
+                 in if md /= 0
+                          then Just (td / md)
+                          else Nothing
+
+-- | Is x between x coordinates of start and end point?
+isXInLine :: Double -> Line -> Bool
+isXInLine x (a, b) = inRange x ((xCoord a), (xCoord b))
+
+calcY :: Line -> Double -> Double
+calcY l x = slope l * x + intercept l
+
 intersect :: Line -> Line -> Bool
 intersect this other
   | ccwFst * ccwSnd > 0 = False
