@@ -14,7 +14,7 @@ type Polygon = [Point]
 type Line = (Point, Point)
 
 tupleToPoint :: (Double, Double) -> Point
-tupleToPoint (x, y) = Point { xCoord = x, yCoord = y }
+tupleToPoint (x, y) = Point x y
 
 addPoints :: Point -> Point -> Point
 addPoints p q = Point (xCoord p + xCoord q) (yCoord p + yCoord q)
