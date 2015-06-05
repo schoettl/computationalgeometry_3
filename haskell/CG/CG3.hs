@@ -28,7 +28,8 @@ type Intersections = [Event]
 type LineYOrder = [Line]
 type LinePair = (Line, Line)
 
-data Event = Startpoint Line | Endpoint Line | Intersection Line Line Point deriving (Show)
+data Event = Startpoint Line | Endpoint Line | Intersection Line Line Point
+ deriving Show
 
 initialEventQueue :: [Line] -> EventQueue
 initialEventQueue ls = Map.fromList $ foldr f [] $ map sortLinePointsByX ls
@@ -55,16 +56,30 @@ processEventQueue es yo is
 
 -- | Handle an event (popped from the event queue).
 handleEvent :: EventQueue -> LineYOrder -> Event -> (EventQueue, LineYOrder, Bool)
-handleEvent es yo (Startpoint l)       = let yo' = insertLineInY yo l in (updateEventQueue es yo', yo', False)
-handleEvent es yo (Endpoint l)         = (es, removeLineFromY yo l, False)
-handleEvent es yo (Intersection a b _) = (es, swapLinesInY yo a b, True)
+handleEvent es yo e@(Startpoint _)       = handleStartpoint es yo e
+handleEvent es yo e@(Endpoint _)         = handleEndpoint es yo e
+handleEvent es yo e@(Intersection _ _ _) = handleIntersection es yo e
+
+handleStartpoint :: EventQueue -> LineYOrder -> Event -> (EventQueue, LineYOrder, Bool)
+handleStartpoint es yo (Startpoint l@(Point x _, _)) = let yo' = insertLineInY yo l
+                                                           es' = updateEventQueue es yo' x
+                                                       in (es', yo', False)
+
+handleEndpoint :: EventQueue -> LineYOrder -> Event -> (EventQueue, LineYOrder, Bool)
+handleEndpoint es yo (Endpoint l@(_, Point x _)) = let yo' = removeLineFromY yo l
+                                                       es' = updateEventQueue es yo' x
+                                                   in (es', yo', False)
+
+handleIntersection :: EventQueue -> LineYOrder -> Event -> (EventQueue, LineYOrder, Bool)
+handleIntersection es yo (Intersection a b (Point x _)) = let yo' = swapLinesInY yo a b
+                                                              es' = updateEventQueue es yo' x
+                                                          in (es', yo', True)
 
 -- | Alle benachbarten Linien auf Schnittpunkt testen und diese als Ereignisse hinzufügen, wenn x > aktuelles x
-updateEventQueue :: EventQueue -> LineYOrder -> EventQueue
-updateEventQueue es yo = let linePairs = zip yo (tail yo)
-                             minX = fst $ Map.findMin es
-                             intersects = calculateRelevantIntersections linePairs minX
-                         in  foldr insertIntersection es intersects
+updateEventQueue :: EventQueue -> LineYOrder -> Double -> EventQueue
+updateEventQueue es yo x = let linePairs = zip yo (tail yo)
+                               intersects = calculateRelevantIntersections linePairs x
+                           in  foldr insertIntersection es intersects
 
 -- | Calculate Intersection events for line pairs, where the x coordinate of
 -- the intersection point is greater than the minimum x of the event queue.

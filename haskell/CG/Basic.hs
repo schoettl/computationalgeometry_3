@@ -23,4 +23,4 @@ slope :: Line -> Double
 slope (a, b) = (yCoord b - yCoord a) / (xCoord b - xCoord a)
 
 intercept :: Line -> Double
-intercept l@(a, _) = let m = slope l in yCoord a - m * xCoord a
+intercept l@(Point x y, _) = let m = slope l in y - m * x

@@ -6,8 +6,7 @@ intersectPoint :: Line -> Line -> Maybe Point
 intersectPoint a b = case intersectX a b of
                       Nothing -> Nothing
                       Just x -> if isInLine a && isInLine b
-                                then Just Point { xCoord = x
-                                                , yCoord = calcY a x}
+                                then Just (Point x (calcY a x))
                                 else Nothing
                                 where isInLine = isXInLine x
 
