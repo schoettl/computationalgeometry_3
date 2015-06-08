@@ -10,7 +10,7 @@ main = hspec $ do
   describe "intersectPoint" $ do
     it "returns Nothing when lines are parallel" $ do
       uncurry intersectPoint parallelLines `shouldBe` Nothing
-    it "throws error on a vertical line" $ do
+    it "throws error when there is a vertical line" $ do
       uncurry intersectPoint lineAndVerticalLine `shouldThrow` error
     it "returns Nothing when intersection point is not between the endpoints" $ do
       uncurry intersectPoint linesWithIntersectionOutside `shouldBe` Nothing
