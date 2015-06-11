@@ -5,6 +5,7 @@ import Data.List
 import Data.Maybe (fromJust, isJust, isNothing)
 import CG.Basic
 import CG.Intersect (intersectPoint)
+import Debug.Trace
 
 convertInput :: String -> [Line]
 convertInput input = let numbers = map (read :: String -> Double) $ words input in
@@ -86,7 +87,7 @@ updateEventQueue es yo x = let linePairs = zip yo (tail yo)
 calculateRelevantIntersections :: [LinePair] -> Double -> Intersections
 calculateRelevantIntersections linePairs minX = let intersects = calculateIntersects linePairs
                                                     intersects' = filter (\(_, p) -> xCoord p > minX) intersects
-                                                in map (\((a, b), p) -> Intersection a b p) intersects'
+                                                in trace (show minX) $ map (\((a, b), p) -> Intersection a b p) intersects'
 
 -- | Calculate the intersection points for the given line pairs.
 calculateIntersects :: [LinePair] -> [(LinePair, Point)]
@@ -96,14 +97,16 @@ calculateIntersects linePairs = let all = zip linePairs $ map (uncurry intersect
 
 -- | Insert an event into the event queue. The event queue is sorted by x coordinates.
 insertIntersection :: Event -> EventQueue -> EventQueue
-insertIntersection i@(Intersection _ _ p) es =
-        if isNothing $ Map.lookup (xCoord p) es
-            then error $ "x already exists. tried to insert intersect " ++ show i
-            else Map.insert (xCoord p) i es
+insertIntersection i@(Intersection _ _ p) es = let x = xCoord p in
+            if Map.member x es
+             then error $ "event at x exists already: " ++ show x
+                  ++ "\nexisting: " ++ (show . fromJust . Map.lookup x) es
+                  ++ "\nnew: " ++ show i
+             else Map.insert x i es
 
 insertLineInY :: LineYOrder -> Line -> LineYOrder
 insertLineInY yo l = insertBy yOrder l yo
-                             where yOrder a b = compare y1 y2
+                             where yOrder a b = if y1 == y2 then error "same y on insert" else compare y1 y2
                                     where p  = fst a
                                           y1 = yCoord p
                                           q1 = fst b
