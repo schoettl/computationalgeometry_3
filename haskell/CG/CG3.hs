@@ -2,7 +2,7 @@ module CG.CG3 where
 
 import qualified Data.Map.Lazy as Map
 import Data.List
-import Data.Maybe (fromJust, isJust)
+import Data.Maybe (fromJust, isJust, isNothing)
 import CG.Basic
 import CG.Intersect (intersectPoint)
 
@@ -28,7 +28,7 @@ type Intersections = [Event]
 type LineYOrder = [Line]
 type LinePair = (Line, Line)
 
-data Event = Startpoint Line | Endpoint Line | Intersection Line Line Point
+data Event = Startpoint Line | Endpoint Line | Intersection Line Line Point deriving (Show)
 
 initialEventQueue :: [Line] -> EventQueue
 initialEventQueue ls = Map.fromList $ foldr f [] $ map sortLinePointsByX ls
@@ -47,6 +47,7 @@ processEventQueue :: EventQueue -> LineYOrder -> Intersections -> Intersections
 processEventQueue es yo is
     | Map.null es = is
     | otherwise = let (e, es') = popEvent es
+
                       (es'', yo', ii) = handleEvent es' yo e
                       is' = if ii then e:is else is
                   in  processEventQueue es'' yo' is'
@@ -80,7 +81,10 @@ calculateIntersects linePairs = let all = zip linePairs $ map (uncurry intersect
 
 -- | Insert an event into the event queue. The event queue is sorted by x coordinates.
 insertIntersection :: Event -> EventQueue -> EventQueue
-insertIntersection i@(Intersection _ _ p) es = Map.insert (xCoord p) i es
+insertIntersection i@(Intersection _ _ p) es =
+        if isNothing $ Map.lookup (xCoord p) es
+            then error $ "x already exists. tried to insert intersect " ++ show i
+            else Map.insert (xCoord p) i es
 
 insertLineInY :: LineYOrder -> Line -> LineYOrder
 insertLineInY yo l = insertBy yOrder l yo
