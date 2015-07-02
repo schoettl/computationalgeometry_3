@@ -30,7 +30,7 @@ type LineYOrder = [Line]
 type LinePair = (Line, Line)
 
 data Event = Startpoint Line | Endpoint Line | Intersection Line Line Point
- deriving Show
+ deriving (Show, Eq)
 
 initialEventQueue :: [Line] -> EventQueue
 initialEventQueue ls = Map.fromList $ foldr f [] $ map sortLinePointsByX ls
@@ -80,7 +80,7 @@ handleIntersection es yo (Intersection a b (Point x _)) = let yo' = swapLinesInY
 updateEventQueue :: EventQueue -> LineYOrder -> Double -> EventQueue
 updateEventQueue es yo x = let linePairs = zip yo (tail yo)
                                intersects = calculateRelevantIntersections linePairs x
-                           in  foldr insertIntersection es intersects
+                           in  trace ("update event queue, x == " ++ show x) $ foldr insertIntersection es intersects
 
 -- | Calculate Intersection events for line pairs, where the x coordinate of
 -- the intersection point is greater than the minimum x of the event queue.
@@ -97,12 +97,14 @@ calculateIntersects linePairs = let all = zip linePairs $ map (uncurry intersect
 
 -- | Insert an event into the event queue. The event queue is sorted by x coordinates.
 insertIntersection :: Event -> EventQueue -> EventQueue
-insertIntersection i@(Intersection _ _ p) es = let x = xCoord p in
-            if Map.member x es
-             then error $ "event at x exists already: " ++ show x
-                  ++ "\nexisting: " ++ (show . fromJust . Map.lookup x) es
-                  ++ "\nnew: " ++ show i
-             else Map.insert x i es
+insertIntersection i@(Intersection _ _ p) es =
+        let x = xCoord p
+            e = Map.lookup x es
+        in if isNothing e
+              then Map.insert x i es
+              else if fromJust e == i
+                then error $ "intersection event exists already: " ++ show i
+                else es
 
 insertLineInY :: LineYOrder -> Line -> LineYOrder
 insertLineInY yo l = insertBy yOrder l yo
