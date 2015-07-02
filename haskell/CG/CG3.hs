@@ -87,7 +87,7 @@ updateEventQueue es yo x = let linePairs = zip yo (tail yo)
 calculateRelevantIntersections :: [LinePair] -> Double -> Intersections
 calculateRelevantIntersections linePairs minX = let intersects = calculateIntersects linePairs
                                                     intersects' = filter (\(_, p) -> xCoord p > minX) intersects
-                                                in trace (show minX) $ map (\((a, b), p) -> Intersection a b p) intersects'
+                                                 in map (\((a, b), p) -> Intersection a b p) intersects'
 
 -- | Calculate the intersection points for the given line pairs.
 calculateIntersects :: [LinePair] -> [(LinePair, Point)]
@@ -102,9 +102,11 @@ insertIntersection i@(Intersection _ _ p) es =
             e = Map.lookup x es
         in if isNothing e
               then Map.insert x i es
-              else if fromJust e == i
-                then error $ "intersection event exists already: " ++ show i
-                else es
+              else
+                let e' = fromJust e
+                in if e' /= i
+                  then error $ "other event exists already: " ++ show e'
+                  else es
 
 insertLineInY :: LineYOrder -> Line -> LineYOrder
 insertLineInY yo l = insertBy yOrder l yo
